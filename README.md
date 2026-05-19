@@ -1,1 +1,1 @@
-This is a custom RSS reader that I'm building for my personal site, https://corkcorner.space .
+This is a custom RSS reader that I'm building for my personal site, https://corkcorner.space . It works as a Vercel API.
