@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Reader</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="rss.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="#" class="site-logo">Random Blog</a>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Archive</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- Hero / intro section -->
+        <section class="hero">
+            <h1>Welcome to Random Blog</h1>
+            <p>Thoughts, projects, and occasional ramblings.</p>
+        </section>
+
+        <!-- Featured / recent blog posts -->
+        <section class="posts">
+            <h2>Recent Posts</h2>
+
+            <article class="post-card">
+                <span class="post-date">May 19, 2026</span>
+                <h3><a href="#">Post Title Goes Here</a></h3>
+                <p>A short excerpt or summary of the post goes here. Keep it to a couple of sentences to draw the reader in.</p>
+                <a href="#" class="read-more">Read more &rarr;</a>
+            </article>
+
+            <article class="post-card">
+                <span class="post-date">May 12, 2026</span>
+                <h3><a href="#">Another Post Title</a></h3>
+                <p>Another short excerpt or summary of the post goes here.</p>
+                <a href="#" class="read-more">Read more &rarr;</a>
+            </article>
+
+        </section>
+
+        <!-- RSS feed sidebar/section -->
+        <section class="rss-section">
+            <h2>Latest from the Web</h2>
+            <div id="feed-container">
+                <!-- RSS feed items will be dynamically inserted here -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Random Blog &mdash; <a href="#">Back to top</a></p>
+    </footer>
+
+</body>
+</html>
