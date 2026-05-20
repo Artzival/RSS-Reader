@@ -1,4 +1,4 @@
-const RSS_URL = "https://neocities.org/site/xandra.rss";
+const RSS_URL = "https://www.nasa.gov/rss/dyn/breaking_news.rss";
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -7,19 +7,67 @@ export default async function handler(req, res) {
     }
 
 
-try {
-    const upstream = await fetch(RSS_URL);
-    const xml = await upstream.text();
-    res.status(200).json({
-        ok: true,
-        preview: xml.slice(0, 300)
-    });
-} catch (error) {
-    res.status(500).json({
-        error: "fetch failed",
-        details: error.message
-    });
-}
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
+        const upstream = await fetch(RSS_URL, {
+            signal: controller.signal,
+            headers: { "User-Agent": "rss-reader/1.0" }
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!upstream.ok) {
+            res.status(502).json({
+                error: "Upstream fetch failed",
+                status: upstream.status
+            });
+            return;
+        }
+
+        const xml = await upstream.text();
+
+        const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
+
+        if (itemBlocks.length === 0) {
+            res.status(200).json({
+                ok: true,
+                stage: 4,
+                items: []
+            });
+            return;
+        }
+
+        const items = itemBlocks.slice(0, 6).map((itemXml) => {
+            const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
+            const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/i);
+            const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
+
+            return {
+                title: titleMatch ? titleMatch[1].trim() : "Untitled",
+                link: linkMatch ? linkMatch[1].trim() : "#",
+                pubDate: pubDateMatch ? pubDateMatch[1].trim() : ""
+            };
+        });
+
+        res.status(200).json({
+            ok: true,
+            stage: 4,
+            items
+        });
+    } catch (error) {
+        if (error.name === "AbortError") {
+            res.status(504).json({
+                error: "Upstream feed timed out"
+            });
+            return;
+        }
+
+        res.status(500).json({
+            error: "fetch failed",
+            details: error.message
+        });
+    }
 
 }
