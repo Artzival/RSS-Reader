@@ -11,6 +11,13 @@ function normalizeUrl(url) {
     return url.replaceAll("&#038;", "&").replaceAll("&amp;", "&");
 }
 
+function normalizeDescription(text) {
+    return text
+        .replaceAll("&#8230;", "...")
+        .replaceAll("&#038;", "&")
+        .replaceAll("&amp;", "&");
+}
+
 function extractImageUrl(itemXml, descriptionHtml) {
     const mediaContentMatch = itemXml.match(/<media:content[^>]*url="([^"]+)"/i);
     if (mediaContentMatch) return normalizeUrl(mediaContentMatch[1]);
@@ -74,7 +81,9 @@ export default async function handler(req, res) {
             const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/i);
             const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
             const descriptionMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
-            const description = descriptionMatch ? unwrapCdata(descriptionMatch[1]) : "";
+            const description = descriptionMatch
+                ? normalizeDescription(unwrapCdata(descriptionMatch[1]))
+                : "";
             const imageUrl = extractImageUrl(itemXml, description);
 
             return {
