@@ -173,6 +173,14 @@ main section h2 {
     color: #444;
 }
 
+#feed-container article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
 /* ── Footer ── */
 footer {
     text-align: center;

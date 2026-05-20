@@ -23,9 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     const link = item.link || "#";
                     const pubDate = escapeHtml(item.pubDate || "");
                     const description = escapeHtml(item.description || "");
+                    const imageUrl = item.imageUrl || "";
 
                     return `
                         <article>
+                            ${imageUrl ? `<img src="${imageUrl}" alt="" loading="lazy">` : ""}
                             <h2><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h2>
                             ${pubDate ? `<p class="meta">${pubDate}</p>` : ""}
                             ${description ? `<p>${description}</p>` : ""}

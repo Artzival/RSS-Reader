@@ -7,6 +7,29 @@ function unwrapCdata(text) {
         .trim();
 }
 
+function normalizeUrl(url) {
+    return url.replaceAll("&#038;", "&").replaceAll("&amp;", "&");
+}
+
+function extractImageUrl(itemXml, descriptionHtml) {
+    const mediaContentMatch = itemXml.match(/<media:content[^>]*url="([^"]+)"/i);
+    if (mediaContentMatch) return normalizeUrl(mediaContentMatch[1]);
+
+    const mediaThumbnailMatch = itemXml.match(/<media:thumbnail[^>]*url="([^"]+)"/i);
+    if (mediaThumbnailMatch) return normalizeUrl(mediaThumbnailMatch[1]);
+
+    const enclosureMatch = itemXml.match(/<enclosure[^>]*url="([^"]+)"/i);
+    if (enclosureMatch) return normalizeUrl(enclosureMatch[1]);
+
+    const imgInItemMatch = itemXml.match(/<img[^>]*src=["']([^"']+)["']/i);
+    if (imgInItemMatch) return normalizeUrl(imgInItemMatch[1]);
+
+    const imgInDescriptionMatch = descriptionHtml.match(/<img[^>]*src=["']([^"']+)["']/i);
+    if (imgInDescriptionMatch) return normalizeUrl(imgInDescriptionMatch[1]);
+
+    return "";
+}
+
 export default async function handler(req, res) {
     if (req.method !== "GET") {
         res.status(405).json({ error: "Method not allowed" });
@@ -52,12 +75,14 @@ export default async function handler(req, res) {
             const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
             const descriptionMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
             const description = descriptionMatch ? unwrapCdata(descriptionMatch[1]) : "";
+            const imageUrl = extractImageUrl(itemXml, description);
 
             return {
                 title: titleMatch ? titleMatch[1].trim() : "Untitled",
                 link: linkMatch ? linkMatch[1].trim() : "#",
                 pubDate: pubDateMatch ? pubDateMatch[1].trim() : "",
-                description
+                description,
+                imageUrl
             };
         });
 
