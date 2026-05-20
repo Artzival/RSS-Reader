@@ -22,11 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     const title = escapeHtml(item.title || "Untitled");
                     const link = item.link || "#";
                     const pubDate = escapeHtml(item.pubDate || "");
+                    const description = escapeHtml(item.description || "");
 
                     return `
                         <article>
                             <h2><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h2>
                             ${pubDate ? `<p class="meta">${pubDate}</p>` : ""}
+                            ${description ? `<p>${description}</p>` : ""}
                         </article>
                     `;
                 })

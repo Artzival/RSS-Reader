@@ -1,5 +1,12 @@
 const RSS_URL = "https://www.nasa.gov/rss/dyn/breaking_news.rss";
 
+function unwrapCdata(text) {
+    return text
+        .replace(/^<!\[CDATA\[/i, "")
+        .replace(/\]\]>\s*$/i, "")
+        .trim();
+}
+
 export default async function handler(req, res) {
     if (req.method !== "GET") {
         res.status(405).json({ error: "Method not allowed" });
@@ -43,11 +50,14 @@ export default async function handler(req, res) {
             const titleMatch = itemXml.match(/<title>([\s\S]*?)<\/title>/i);
             const linkMatch = itemXml.match(/<link>([\s\S]*?)<\/link>/i);
             const pubDateMatch = itemXml.match(/<pubDate>([\s\S]*?)<\/pubDate>/i);
+            const descriptionMatch = itemXml.match(/<description>([\s\S]*?)<\/description>/i);
+            const description = descriptionMatch ? unwrapCdata(descriptionMatch[1]) : "";
 
             return {
                 title: titleMatch ? titleMatch[1].trim() : "Untitled",
                 link: linkMatch ? linkMatch[1].trim() : "#",
-                pubDate: pubDateMatch ? pubDateMatch[1].trim() : ""
+                pubDate: pubDateMatch ? pubDateMatch[1].trim() : "",
+                description
             };
         });
 
