@@ -1,1 +1,3 @@
 This is a custom RSS reader that I'm building for my personal site, https://corkcorner.space . It works as a Vercel API.
+
+If you'd like to implement this into your own personal site, yoink the javascript files. Have your javascript for whichever page you are going to use include all ofthe code from rssdisplay.js. Implement rss.js into your api folder. In the spot where you want the RSS feed to load, make the id="feed-container". Ensure you're using Vercel Serverless, and you should be good to go! 
