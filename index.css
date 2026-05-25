@@ -139,6 +139,30 @@ main section h2 {
     padding: 1.5rem;
 }
 
+.feed-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 0.5rem;
+    font-family: Arial, sans-serif;
+}
+
+.feed-source {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    font-family: Arial, sans-serif;
+}
+
+.feed-source a {
+    color: #1a1a2e;
+    word-break: break-all;
+}
+
+.feed-source a:hover {
+    text-decoration: underline;
+}
+
 /* ── Feed items (injected by rss.js) ── */
 #feed-container article {
     background: #fff;

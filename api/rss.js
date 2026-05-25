@@ -1,4 +1,4 @@
-const RSS_URL = "https://www.nasa.gov/rss/dyn/breaking_news.rss";
+const RSS_URL = "http://krebsonsecurity.com/feed/";
 
 function unwrapCdata(text) {
     return text
@@ -16,6 +16,16 @@ function normalizeDescription(text) {
         .replaceAll("&#8230;", "...")
         .replaceAll("&#038;", "&")
         .replaceAll("&amp;", "&");
+}
+
+function extractFeedTitle(xml) {
+    const channelMatch = xml.match(/<channel[\s\S]*?<\/channel>/i);
+    if (!channelMatch) return "";
+
+    const titleMatch = channelMatch[0].match(/<title>([\s\S]*?)<\/title>/i);
+    if (!titleMatch) return "";
+
+    return normalizeDescription(unwrapCdata(titleMatch[1]));
 }
 
 function extractImageUrl(itemXml, descriptionHtml) {
@@ -64,6 +74,7 @@ export default async function handler(req, res) {
         }
 
         const xml = await upstream.text();
+        const sourceTitle = extractFeedTitle(xml);
 
         const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
 
@@ -71,6 +82,8 @@ export default async function handler(req, res) {
             res.status(200).json({
                 ok: true,
                 stage: 4,
+                sourceTitle,
+                sourceUrl: RSS_URL,
                 items: []
             });
             return;
@@ -98,6 +111,8 @@ export default async function handler(req, res) {
         res.status(200).json({
             ok: true,
             stage: 4,
+            sourceTitle,
+            sourceUrl: RSS_URL,
             items
         });
     } catch (error) {
