@@ -16,6 +16,8 @@ function normalizeDescription(text) {
         .replaceAll("&#8230;", "...")
         .replaceAll("&#038;", "&")
         .replaceAll("&amp;", "&");
+        .replaceAll("&#039;", "'")
+        .replaceAll("&#39;", "'")
 }
 
 function extractChannelMetadata(xml) {
