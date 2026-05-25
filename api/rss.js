@@ -18,14 +18,46 @@ function normalizeDescription(text) {
         .replaceAll("&amp;", "&");
 }
 
-function extractFeedTitle(xml) {
+function extractChannelMetadata(xml) {
     const channelMatch = xml.match(/<channel[\s\S]*?<\/channel>/i);
-    if (!channelMatch) return "";
+    if (!channelMatch) {
+        return {
+            sourceTitle: "",
+            sourceDescription: "",
+            sourceLastBuildDate: "",
+            sourceImageUrl: ""
+        };
+    }
 
-    const titleMatch = channelMatch[0].match(/<title>([\s\S]*?)<\/title>/i);
-    if (!titleMatch) return "";
+    const channelXml = channelMatch[0];
+    const titleMatch = channelXml.match(/<title>([\s\S]*?)<\/title>/i);
+    const descriptionMatch = channelXml.match(/<description>([\s\S]*?)<\/description>/i);
+    const lastBuildDateMatch = channelXml.match(/<lastBuildDate>([\s\S]*?)<\/lastBuildDate>/i);
+    const channelImageMatch = channelXml.match(/<image>[\s\S]*?<url>([\s\S]*?)<\/url>[\s\S]*?<\/image>/i);
+    const itunesImageMatch = channelXml.match(/<itunes:image[^>]*href=["']([^"']+)["']/i);
 
-    return normalizeDescription(unwrapCdata(titleMatch[1]));
+    return {
+        sourceTitle: titleMatch ? normalizeDescription(unwrapCdata(titleMatch[1])) : "",
+        sourceDescription: descriptionMatch
+            ? normalizeDescription(unwrapCdata(descriptionMatch[1]))
+            : "",
+        sourceLastBuildDate: lastBuildDateMatch
+            ? normalizeDescription(unwrapCdata(lastBuildDateMatch[1]))
+            : "",
+        sourceImageUrl: channelImageMatch
+            ? normalizeUrl(channelImageMatch[1].trim())
+            : (itunesImageMatch ? normalizeUrl(itunesImageMatch[1].trim()) : "")
+    };
+}
+
+function extractItemAuthor(itemXml) {
+    const dcCreatorMatch = itemXml.match(/<dc:creator>([\s\S]*?)<\/dc:creator>/i);
+    if (dcCreatorMatch) return normalizeDescription(unwrapCdata(dcCreatorMatch[1]));
+
+    const authorMatch = itemXml.match(/<author>([\s\S]*?)<\/author>/i);
+    if (authorMatch) return normalizeDescription(unwrapCdata(authorMatch[1]));
+
+    return "";
 }
 
 function extractImageUrl(itemXml, descriptionHtml) {
@@ -74,7 +106,12 @@ export default async function handler(req, res) {
         }
 
         const xml = await upstream.text();
-        const sourceTitle = extractFeedTitle(xml);
+        const {
+            sourceTitle,
+            sourceDescription,
+            sourceLastBuildDate,
+            sourceImageUrl
+        } = extractChannelMetadata(xml);
 
         const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/gi) || [];
 
@@ -83,6 +120,9 @@ export default async function handler(req, res) {
                 ok: true,
                 stage: 4,
                 sourceTitle,
+                sourceDescription,
+                sourceLastBuildDate,
+                sourceImageUrl,
                 sourceUrl: RSS_URL,
                 items: []
             });
@@ -98,13 +138,15 @@ export default async function handler(req, res) {
                 ? normalizeDescription(unwrapCdata(descriptionMatch[1]))
                 : "";
             const imageUrl = extractImageUrl(itemXml, description);
+            const author = extractItemAuthor(itemXml);
 
             return {
                 title: titleMatch ? titleMatch[1].trim() : "Untitled",
                 link: linkMatch ? linkMatch[1].trim() : "#",
                 pubDate: pubDateMatch ? pubDateMatch[1].trim() : "",
                 description,
-                imageUrl
+                imageUrl,
+                author
             };
         });
 
@@ -112,6 +154,9 @@ export default async function handler(req, res) {
             ok: true,
             stage: 4,
             sourceTitle,
+            sourceDescription,
+            sourceLastBuildDate,
+            sourceImageUrl,
             sourceUrl: RSS_URL,
             items
         });
